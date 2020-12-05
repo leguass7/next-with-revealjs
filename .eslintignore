@@ -1,0 +1,5 @@
+*.d.ts
+./.next/*
+node_modules/*
+coverage
+
