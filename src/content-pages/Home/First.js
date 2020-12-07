@@ -1,6 +1,12 @@
-import React from 'react'
+import React, { useCallback } from 'react'
+import { useRevealDeck } from '../../components/Reveal'
 
 export default function First() {
+  const [Deck, { progress, indices }] = useRevealDeck()
+
+  const handleClick = useCallback(() => {
+    if (Deck) Deck.right()
+  }, [Deck])
   return (
     <>
       <h1>First Reveal.js</h1>
@@ -10,6 +16,7 @@ export default function First() {
           Created by <a href="http://hakim.se">Hakim El Hattab</a> /{' '}
           <a href="http://twitter.com/hakimel">@hakimel</a>
         </small>
+        <button onClick={handleClick}>PASSAR ({progress})</button>
       </p>
     </>
   )

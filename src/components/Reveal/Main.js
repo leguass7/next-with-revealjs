@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useMemo } from 'react'
+import React, { useRef, useEffect, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import RevealJS from './revealjs'
 
@@ -7,11 +7,19 @@ let deck = false
 
 export default function RevealMain({ children }) {
   const revealRef = useRef(null)
+  const [ready, setReady] = useState(false)
+  const [initialIndices, setInitialIndices] = useState({})
 
-  const getDeck = useMemo(() => deck, [])
-  const getRefDom = useCallback(() => {
-    return revealRef.current
-  }, [revealRef])
+  const getDeck = useCallback(() => deck, [])
+  const isReady = useCallback(() => !!(ready && deck), [ready])
+
+  // const getRefDom = useCallback(() => {
+  //   return revealRef.current
+  // }, [revealRef])
+
+  const getInitialIndices = useCallback(() => {
+    return initialIndices
+  }, [initialIndices])
 
   useEffect(() => {
     if (!deck && revealRef.current) {
@@ -24,9 +32,13 @@ export default function RevealMain({ children }) {
           center: true,
           transition: 'slide'
         })
-        .then(() => {
-          // eslint-disable-next-line no-console
-          console.log('reveal.js is ready', revealRef.current)
+        .then(e => {
+          setInitialIndices({
+            currentSlide: e.currentSlide,
+            indexh: e.indexh,
+            indexv: e.indexv
+          })
+          setReady(true)
         })
     }
   }, [])
@@ -37,10 +49,13 @@ export default function RevealMain({ children }) {
       className="reveal"
       style={{
         position: 'relative',
-        height: '100vh'
+        height: '100vh',
+        minHeight: '100%'
       }}
     >
-      <RevealProvider.Provider value={{ getRefDom, getDeck }}>{children}</RevealProvider.Provider>
+      <RevealProvider.Provider value={{ getDeck, isReady, getInitialIndices }}>
+        {children}
+      </RevealProvider.Provider>
     </div>
   )
 }

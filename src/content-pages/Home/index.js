@@ -9,10 +9,10 @@ export default function PageHome() {
   return (
     <RevealMain>
       <Slides>
-        <Section>
+        <Section id="initial">
           <FirstContent />
         </Section>
-        <Section>
+        <Section id="hello-there">
           <HelloThere />
         </Section>
       </Slides>

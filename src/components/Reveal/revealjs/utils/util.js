@@ -5,35 +5,30 @@
  * @param {object} a
  * @param {object} b
  */
-export const extend = ( a, b ) => {
+export const extend = (a, b) => {
+  for (const i in b) {
+    a[i] = b[i]
+  }
 
-	for( let i in b ) {
-		a[ i ] = b[ i ];
-	}
-
-	return a;
-
+  return a
 }
 
 /**
  * querySelectorAll but returns an Array.
  */
-export const queryAll = ( el, selector ) => {
-
-	return Array.from( el.querySelectorAll( selector ) );
-
+export const queryAll = (el, selector) => {
+  return Array.from(el.querySelectorAll(selector))
 }
 
 /**
  * classList.toggle() with cross browser support
  */
-export const toggleClass = ( el, className, value ) => {
-	if( value ) {
-		el.classList.add( className );
-	}
-	else {
-		el.classList.remove( className );
-	}
+export const toggleClass = (el, className, value) => {
+  if (value) {
+    el.classList.add(className)
+  } else {
+    el.classList.remove(className)
+  }
 }
 
 /**
@@ -42,17 +37,16 @@ export const toggleClass = ( el, className, value ) => {
  * @param {*} value
  * @return {*}
  */
-export const deserialize = ( value ) => {
+export const deserialize = value => {
+  if (typeof value === 'string') {
+    if (value === 'null') return null
+    else if (value === 'true') return true
+    else if (value === 'false') return false
+    // eslint-disable-next-line no-useless-escape
+    else if (value.match(/^-?[\d\.]+$/)) return parseFloat(value)
+  }
 
-	if( typeof value === 'string' ) {
-		if( value === 'null' ) return null;
-		else if( value === 'true' ) return true;
-		else if( value === 'false' ) return false;
-		else if( value.match( /^-?[\d\.]+$/ ) ) return parseFloat( value );
-	}
-
-	return value;
-
+  return value
 }
 
 /**
@@ -64,13 +58,11 @@ export const deserialize = ( value ) => {
  *
  * @return {number}
  */
-export const distanceBetween = ( a, b ) => {
+export const distanceBetween = (a, b) => {
+  const dx = a.x - b.x
+  const dy = a.y - b.y
 
-	let dx = a.x - b.x,
-		dy = a.y - b.y;
-
-	return Math.sqrt( dx*dx + dy*dy );
-
+  return Math.sqrt(dx * dx + dy * dy)
 }
 
 /**
@@ -79,10 +71,8 @@ export const distanceBetween = ( a, b ) => {
  * @param {HTMLElement} element
  * @param {string} transform
  */
-export const transformElement = ( element, transform ) => {
-
-	element.style.transform = transform;
-
+export const transformElement = (element, transform) => {
+  element.style.transform = transform
 }
 
 /**
@@ -94,12 +84,10 @@ export const transformElement = ( element, transform ) => {
  *
  * @return {Boolean}
  */
-export const matches = ( target, selector ) => {
+export const matches = (target, selector) => {
+  const matchesMethod = target.matches || target.matchesSelector || target.msMatchesSelector
 
-	let matchesMethod = target.matches || target.matchesSelector || target.msMatchesSelector;
-
-	return !!( matchesMethod && matchesMethod.call( target, selector ) );
-
+  return !!(matchesMethod && matchesMethod.call(target, selector))
 }
 
 /**
@@ -113,25 +101,23 @@ export const matches = ( target, selector ) => {
  * @return {HTMLElement} The matched parent or null
  * if no matching parent was found
  */
-export const closest = ( target, selector ) => {
+export const closest = (target, selector) => {
+  // Native Element.closest
+  if (typeof target.closest === 'function') {
+    return target.closest(selector)
+  }
 
-	// Native Element.closest
-	if( typeof target.closest === 'function' ) {
-		return target.closest( selector );
-	}
+  // Polyfill
+  while (target) {
+    if (matches(target, selector)) {
+      return target
+    }
 
-	// Polyfill
-	while( target ) {
-		if( matches( target, selector ) ) {
-			return target;
-		}
+    // Keep searching
+    target = target.parentNode
+  }
 
-		// Keep searching
-		target = target.parentNode;
-	}
-
-	return null;
-
+  return null
 }
 
 /**
@@ -141,20 +127,19 @@ export const closest = ( target, selector ) => {
  * @see https://developer.mozilla.org/en-US/docs/DOM/Using_fullscreen_mode
  */
 export const enterFullscreen = element => {
+  element = element || document.documentElement
 
-	element = element || document.documentElement;
+  // Check which implementation is available
+  const requestMethod =
+    element.requestFullscreen ||
+    element.webkitRequestFullscreen ||
+    element.webkitRequestFullScreen ||
+    element.mozRequestFullScreen ||
+    element.msRequestFullscreen
 
-	// Check which implementation is available
-	let requestMethod = element.requestFullscreen ||
-						element.webkitRequestFullscreen ||
-						element.webkitRequestFullScreen ||
-						element.mozRequestFullScreen ||
-						element.msRequestFullscreen;
-
-	if( requestMethod ) {
-		requestMethod.apply( element );
-	}
-
+  if (requestMethod) {
+    requestMethod.apply(element)
+  }
 }
 
 /**
@@ -169,28 +154,26 @@ export const enterFullscreen = element => {
  *
  * @return {HTMLElement}
  */
-export const createSingletonNode = ( container, tagname, classname, innerHTML='' ) => {
+export const createSingletonNode = (container, tagname, classname, innerHTML = '') => {
+  // Find all nodes matching the description
+  const nodes = container.querySelectorAll('.' + classname)
 
-	// Find all nodes matching the description
-	let nodes = container.querySelectorAll( '.' + classname );
+  // Check all matches to find one which is a direct child of
+  // the specified container
+  for (let i = 0; i < nodes.length; i++) {
+    const testNode = nodes[i]
+    if (testNode.parentNode === container) {
+      return testNode
+    }
+  }
 
-	// Check all matches to find one which is a direct child of
-	// the specified container
-	for( let i = 0; i < nodes.length; i++ ) {
-		let testNode = nodes[i];
-		if( testNode.parentNode === container ) {
-			return testNode;
-		}
-	}
+  // If no node was found, create it now
+  const node = document.createElement(tagname)
+  node.className = classname
+  node.innerHTML = innerHTML
+  container.appendChild(node)
 
-	// If no node was found, create it now
-	let node = document.createElement( tagname );
-	node.className = classname;
-	node.innerHTML = innerHTML;
-	container.appendChild( node );
-
-	return node;
-
+  return node
 }
 
 /**
@@ -198,50 +181,46 @@ export const createSingletonNode = ( container, tagname, classname, innerHTML=''
  *
  * @param {string} value
  */
-export const createStyleSheet = ( value ) => {
+export const createStyleSheet = value => {
+  const tag = document.createElement('style')
+  tag.type = 'text/css'
 
-	let tag = document.createElement( 'style' );
-	tag.type = 'text/css';
+  if (value && value.length > 0) {
+    if (tag.styleSheet) {
+      tag.styleSheet.cssText = value
+    } else {
+      tag.appendChild(document.createTextNode(value))
+    }
+  }
 
-	if( value && value.length > 0 ) {
-		if( tag.styleSheet ) {
-			tag.styleSheet.cssText = value;
-		}
-		else {
-			tag.appendChild( document.createTextNode( value ) );
-		}
-	}
+  document.head.appendChild(tag)
 
-	document.head.appendChild( tag );
-
-	return tag;
-
+  return tag
 }
 
 /**
  * Returns a key:value hash of all query params.
  */
 export const getQueryHash = () => {
+  const query = {}
 
-	let query = {};
+  // eslint-disable-next-line no-useless-escape
+  location.search.replace(/[A-Z0-9]+?=([\w\.%-]*)/gi, a => {
+    query[a.split('=').shift()] = a.split('=').pop()
+  })
 
-	location.search.replace( /[A-Z0-9]+?=([\w\.%-]*)/gi, a => {
-		query[ a.split( '=' ).shift() ] = a.split( '=' ).pop();
-	} );
+  // Basic deserialization
+  for (const i in query) {
+    const value = query[i]
 
-	// Basic deserialization
-	for( let i in query ) {
-		let value = query[ i ];
+    query[i] = deserialize(unescape(value))
+  }
 
-		query[ i ] = deserialize( unescape( value ) );
-	}
+  // Do not accept new dependencies via query config to avoid
+  // the potential of malicious script injection
+  if (typeof query.dependencies !== 'undefined') delete query.dependencies
 
-	// Do not accept new dependencies via query config to avoid
-	// the potential of malicious script injection
-	if( typeof query['dependencies'] !== 'undefined' ) delete query['dependencies'];
-
-	return query;
-
+  return query
 }
 
 /**
@@ -253,30 +232,28 @@ export const getQueryHash = () => {
  * @param {HTMLElement} element
  * @param {number} [height]
  */
-export const getRemainingHeight = ( element, height = 0 ) => {
+export const getRemainingHeight = (element, height = 0) => {
+  if (element) {
+    const oldHeight = element.style.height
 
-	if( element ) {
-		let newHeight, oldHeight = element.style.height;
+    // Change the .stretch element height to 0 in order find the height of all
+    // the other elements
+    element.style.height = '0px'
 
-		// Change the .stretch element height to 0 in order find the height of all
-		// the other elements
-		element.style.height = '0px';
+    // In Overview mode, the parent (.slide) height is set of 700px.
+    // Restore it temporarily to its natural height.
+    element.parentNode.style.height = 'auto'
 
-		// In Overview mode, the parent (.slide) height is set of 700px.
-		// Restore it temporarily to its natural height.
-		element.parentNode.style.height = 'auto';
+    const newHeight = height - element.parentNode.offsetHeight
 
-		newHeight = height - element.parentNode.offsetHeight;
+    // Restore the old height, just in case
+    element.style.height = oldHeight + 'px'
 
-		// Restore the old height, just in case
-		element.style.height = oldHeight + 'px';
+    // Clear the parent (.slide) height. .removeProperty works in IE9+
+    element.parentNode.style.removeProperty('height')
 
-		// Clear the parent (.slide) height. .removeProperty works in IE9+
-		element.parentNode.style.removeProperty('height');
+    return newHeight
+  }
 
-		return newHeight;
-	}
-
-	return height;
-
+  return height
 }
