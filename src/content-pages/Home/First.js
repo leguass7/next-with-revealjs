@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { useRevealDeck } from '../../components/Reveal'
 
 export default function First() {
-  const [Deck, { progress, indices }] = useRevealDeck()
+  const [Deck, { progress }] = useRevealDeck()
 
   const handleClick = useCallback(() => {
     if (Deck) Deck.right()

@@ -13,10 +13,6 @@ export default function RevealMain({ children }) {
   const getDeck = useCallback(() => deck, [])
   const isReady = useCallback(() => !!(ready && deck), [ready])
 
-  // const getRefDom = useCallback(() => {
-  //   return revealRef.current
-  // }, [revealRef])
-
   const getInitialIndices = useCallback(() => {
     return initialIndices
   }, [initialIndices])
